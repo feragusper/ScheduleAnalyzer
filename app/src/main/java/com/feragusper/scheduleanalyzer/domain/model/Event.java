@@ -1,9 +1,11 @@
 package com.feragusper.scheduleanalyzer.domain.model;
 
 /**
- * Created by Fernando.Perez on 10/31/2015.
+ * @author Fernando.Perez
+ * @since 0.1
  */
 public class Event {
+
     private String title;
     private long duration;
 
@@ -24,6 +26,6 @@ public class Event {
     }
 
     public void addDuration(long duration) {
-        this.duration+=duration;
+        this.duration += duration;
     }
 }

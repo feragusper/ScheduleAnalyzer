@@ -1,15 +1,18 @@
 apply plugin: 'com.android.application'
+apply plugin: 'testfairy'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.0"
+    def globalConfiguration = rootProject.extensions.getByName("ext")
+
+    compileSdkVersion globalConfiguration.getAt("androidCompileSdkVersion")
+    buildToolsVersion globalConfiguration.getAt("androidBuildToolsVersion")
 
     defaultConfig {
-        applicationId "scheduleanalyzer.feragusper.com.scheduleanalyzer"
-        minSdkVersion 17
-        targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
+        applicationId "com.feragusper.scheduleanalyzer"
+        minSdkVersion globalConfiguration.getAt("androidMinSdkVersion")
+        versionCode globalConfiguration.getAt("androidVersionCode")
+        versionName globalConfiguration.getAt("androidVersionName")
+        archivesBaseName = "scheduleanalyzer-$versionName"
     }
     buildTypes {
         release {
@@ -17,11 +20,27 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    testfairyConfig {
+        apiKey "8d52b3c87bcba804c8a8fdd5e78b5bc302f2a1cb"
+        metrics "cpu,memory,network,logcat"
+        video "wifi"
+        videoRate "0.5"
+        videoQuality "low"
+        maxDuration "15m"
+        recordOnBackground true
+        iconWatermark true
+        testersGroups "Gulfstream"
+        maxDuration "1h"
+        autoUpdate true
+        uploadProguardMapping true
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.1.0'
-    compile 'com.android.support:design:23.1.0'
+    compile presentationDependencies.butterKnife
+    compile presentationDependencies.appcompat
+    compile presentationDependencies.designSupport
 }

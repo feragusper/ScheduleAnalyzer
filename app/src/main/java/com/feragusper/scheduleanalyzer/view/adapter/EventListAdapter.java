@@ -12,6 +12,10 @@ import com.feragusper.scheduleanalyzer.domain.model.Event;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author Fernando.Perez
+ * @since 0.1
+ */
 public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.EventViewHolder> {
 
     private List<Event> items;
