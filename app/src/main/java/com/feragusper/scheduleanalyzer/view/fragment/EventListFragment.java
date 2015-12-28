@@ -1,16 +1,21 @@
 package com.feragusper.scheduleanalyzer.view.fragment;
 
-import android.app.Fragment;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CalendarContract;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.Time;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -20,8 +25,8 @@ import com.feragusper.scheduleanalyzer.domain.model.Event;
 import com.feragusper.scheduleanalyzer.presenter.EventListPresenter;
 import com.feragusper.scheduleanalyzer.view.EventListView;
 import com.feragusper.scheduleanalyzer.view.adapter.EventListAdapter;
+import com.feragusper.scheduleanalyzer.view.dialog.EventFilterDialog;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -40,12 +45,17 @@ public class EventListFragment extends Fragment implements EventListView {
             CalendarContract.Instances.DTEND
     };
 
-    private EventListPresenter presenter;
+    private EventListPresenter mPresenter;
+    private EventListAdapter mEventListAdapter;
+    private long mExtraDateFrom;
+    private long mExtraDateTo;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        presenter = new EventListPresenter(this);
+        mPresenter = new EventListPresenter(this);
+
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -53,9 +63,28 @@ public class EventListFragment extends Fragment implements EventListView {
         return inflater.inflate(R.layout.fragment_main, container, false);
     }
 
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        @SuppressWarnings("ConstantConditions") RecyclerView recyclerView = (RecyclerView) getView().findViewById(R.id.myList);
+        recyclerView.setHasFixedSize(true);
+        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
+        llm.setOrientation(LinearLayoutManager.VERTICAL);
+        recyclerView.setLayoutManager(llm);
+
+        mEventListAdapter = new EventListAdapter(new ArrayList<Event>());
+        recyclerView.setAdapter(mEventListAdapter);
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        displayEvents();
+    }
+
+    private void displayEvents() {
         Cursor cursor;
         ContentResolver contentResolver = getActivity().getContentResolver();
 
@@ -64,13 +93,20 @@ public class EventListFragment extends Fragment implements EventListView {
 
         // Specify the date range you want to search for recurring
         // event instances
-        Calendar beginTime = Calendar.getInstance();
-        beginTime.set(2014, 9, 23, 8, 0);
-        long startMillis = beginTime.getTimeInMillis();
-        ContentUris.appendId(builder, startMillis);
-        @SuppressWarnings("deprecation") Time time = new Time();
-        time.setToNow();
-        ContentUris.appendId(builder, time.toMillis(false));
+        if (mExtraDateFrom == 0) {
+            Calendar beginTime = Calendar.getInstance();
+            beginTime.set(2014, 9, 23, 8, 0);
+            mExtraDateFrom = beginTime.getTimeInMillis();
+        }
+        ContentUris.appendId(builder, mExtraDateFrom);
+
+        if (mExtraDateTo == 0) {
+            @SuppressWarnings("deprecation") Time time = new Time();
+            time.setToNow();
+            mExtraDateTo = time.toMillis(false);
+
+        }
+        ContentUris.appendId(builder, mExtraDateTo);
 
         // Submit the query
         cursor = contentResolver.query(builder.build(), INSTANCE_PROJECTION, CalendarContract.Instances.SELF_ATTENDEE_STATUS + "=1", null, CalendarContract.Instances.DTSTART);
@@ -84,8 +120,6 @@ public class EventListFragment extends Fragment implements EventListView {
             Long eventDtend = cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTEND));
             Long eventDtstart = cursor.getLong(cursor.getColumnIndex(CalendarContract.Events.DTSTART));
             String eventDuration = cursor.getString(cursor.getColumnIndex(CalendarContract.Events.DURATION));
-            int self = cursor.getInt(cursor.getColumnIndex(CalendarContract.Events.SELF_ATTENDEE_STATUS));
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
             long durationInMillis;
             if (eventDuration != null) {
@@ -101,7 +135,6 @@ public class EventListFragment extends Fragment implements EventListView {
                 durationInMillis = eventDtend - eventDtstart;
             }
 
-//                ((TextView) view.findViewById(scheduleanalyzer.feragusper.com.scheduleanalyzer.R.id.date)).setText(dateFormat.format(eventDtstart) + " - " + (durationInMillis / 60000));
             event.setDuration(durationInMillis);
 
             for (Event eventInList : events) {
@@ -116,12 +149,43 @@ public class EventListFragment extends Fragment implements EventListView {
                 events.add(event);
             }
         }
-        @SuppressWarnings("ConstantConditions") RecyclerView recyclerView = (RecyclerView) getView().findViewById(R.id.myList);
-        recyclerView.setHasFixedSize(true);
-        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
-        recyclerView.setLayoutManager(llm);
 
-        recyclerView.setAdapter(new EventListAdapter(events));
+        mEventListAdapter.updateData(events);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_main, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_filter) {
+            FragmentManager fm = getFragmentManager();
+            EventFilterDialog editNameDialog = EventFilterDialog.newInstance(mExtraDateFrom, mExtraDateTo);
+            editNameDialog.show(fm, "fragment_event_filter");
+            editNameDialog.setTargetFragment(this, 1);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (EventFilterDialog.SET_FILTER == requestCode) {
+            mExtraDateFrom = data.getLongExtra(EventFilterDialog.EXTRA_DATE_FROM, 0);
+            mExtraDateTo = data.getLongExtra(EventFilterDialog.EXTRA_DATE_TO, 0);
+            displayEvents();
+        }
     }
 }

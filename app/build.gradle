@@ -43,4 +43,7 @@ dependencies {
     compile presentationDependencies.butterKnife
     compile presentationDependencies.appcompat
     compile presentationDependencies.designSupport
+
+    compile 'com.code-troopers.betterpickers:library:2.2.2'
+
 }

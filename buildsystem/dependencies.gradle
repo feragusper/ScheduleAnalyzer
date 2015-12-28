@@ -11,7 +11,7 @@ ext {
     androidCompileSdkVersion = 23
 
     //Libraries
-    butterKnifeVersion = '6.0.0'
+    butterKnifeVersion = '7.0.1'
     appcompatVersion = '23.1.0'
     designSupportVersion = '23.1.0'
 

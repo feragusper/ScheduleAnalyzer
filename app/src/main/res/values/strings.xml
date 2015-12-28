@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">ScheduleAnalyzer</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_filter">Filter</string>
+    <string name="filter">Filter</string>
+    <string name="no_selected_date">No selected date</string>
+    <string name="date_to">Date To</string>
+    <string name="date_from">Date From</string>
+    <string name="apply">apply</string>
 </resources>
