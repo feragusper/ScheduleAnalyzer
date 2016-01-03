@@ -4,7 +4,7 @@ Android Application that analyze the data from the installed google calendars in
 
 Support
 -----------------
-If you've found an error in this project, please file an issue: https://github.com/feragusper/ScheduleAnalyzer
+If you've found an error in this project, please file an issue: https://github.com/feragusper/ScheduleAnalyzer/issues
 Patches are encouraged, and may be submitted by forking this project and submitting a pull request through GitHub.
 
 Contribute
