@@ -14,10 +14,12 @@ ext {
     butterKnifeVersion = '7.0.1'
     appcompatVersion = '23.1.0'
     designSupportVersion = '23.1.0'
+    betterPickersVersion = '2.2.2'
 
     presentationDependencies = [
             designSupport : "com.android.support:design:${designSupportVersion}",
             butterKnife    : "com.jakewharton:butterknife:${butterKnifeVersion}",
             appcompat      : "com.android.support:appcompat-v7:${appcompatVersion}",
+            betterPickers  : "com.code-troopers.betterpickers:library:${betterPickersVersion}",
     ]
 }

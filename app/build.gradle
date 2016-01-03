@@ -44,6 +44,6 @@ dependencies {
     compile presentationDependencies.appcompat
     compile presentationDependencies.designSupport
 
-    compile 'com.code-troopers.betterpickers:library:2.2.2'
+    compile presentationDependencies.betterPickers
 
 }
