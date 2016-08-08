@@ -6,4 +6,6 @@
     <string name="date_to">Date To</string>
     <string name="date_from">Date From</string>
     <string name="apply">apply</string>
+    <string name="text_empty_events">There\'s no events</string>
+    <string name="error_loading_events">Oops, something went wrong</string>
 </resources>

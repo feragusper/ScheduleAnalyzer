@@ -28,11 +28,9 @@ def getVersionName = { ->
 buildscript {
     repositories {
         jcenter()
-        maven { url 'https://www.testfairy.com/maven' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.3.0'
-        classpath 'com.testfairy.plugins.gradle:testfairy:1.+'
+        classpath 'com.android.tools.build:gradle:2.1.2'
     }
 }
 

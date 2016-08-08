@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'testfairy'
 
 android {
     def globalConfiguration = rootProject.extensions.getByName("ext")
@@ -14,36 +13,35 @@ android {
         versionName globalConfiguration.getAt("androidVersionName")
         archivesBaseName = "scheduleanalyzer-$versionName"
     }
+
+    dataBinding {
+        enabled = true
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
-    testfairyConfig {
-        apiKey "8d52b3c87bcba804c8a8fdd5e78b5bc302f2a1cb"
-        metrics "cpu,memory,network,logcat"
-        video "wifi"
-        videoRate "0.5"
-        videoQuality "low"
-        maxDuration "15m"
-        recordOnBackground true
-        iconWatermark true
-        testersGroups "Gulfstream"
-        maxDuration "1h"
-        autoUpdate true
-        uploadProguardMapping true
-    }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    compile presentationDependencies.butterKnife
-    compile presentationDependencies.appcompat
-    compile presentationDependencies.designSupport
+    Map<String, String> dependencies = rootProject.extensions.getByName("ext").getAt("dependencies")
 
-    compile presentationDependencies.betterPickers
+    compile dependencies.butterKnife
+    compile dependencies.designSupport
+
+    compile dependencies.betterPickers
+
+    compile dependencies.appCompat
+    compile dependencies.cardView
+    compile dependencies.recyclerView
+    compile dependencies.retrofit
+    compile dependencies.retrofitConverterGson
+    compile dependencies.retrofitAdapterRxJava
+    compile dependencies.picasso
+    compile dependencies.rxAndroid
+    compile dependencies.circleImageView
 
 }

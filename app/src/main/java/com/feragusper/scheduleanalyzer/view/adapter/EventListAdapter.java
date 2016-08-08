@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.feragusper.scheduleanalyzer.R;
 import com.feragusper.scheduleanalyzer.domain.model.Event;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -18,18 +19,15 @@ import java.util.concurrent.TimeUnit;
  */
 public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.EventViewHolder> {
 
-    private List<Event> items;
+    private List<Event> items = new ArrayList<>();
 
-    public EventListAdapter(List<Event> items) {
-        if (items == null) {
-            throw new IllegalArgumentException("modelData must not be null");
-        }
-        this.items = items;
+    public void setEvents(List<Event> events) {
+        this.items = events;
     }
 
     @Override
     public EventViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new EventViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.row_event, parent, false));
+        return new EventViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_event, parent, false));
     }
 
     @Override

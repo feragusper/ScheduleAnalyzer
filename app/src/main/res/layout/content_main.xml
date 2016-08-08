@@ -4,4 +4,4 @@
     android:name="com.feragusper.scheduleanalyzer.view.fragment.EventListFragment"
     android:layout_width="match_parent" android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:layout="@layout/fragment_main" />
+    tools:layout="@layout/fragment_event_list" />
