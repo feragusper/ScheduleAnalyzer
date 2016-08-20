@@ -11,12 +11,18 @@ import rx.Observable;
  */
 public class GetAllEventsUseCase extends UseCase {
 
-    public GetAllEventsUseCase(ThreadExecutor threadExecutor, PostExecutionThread postExecutionThread) {
+    private final long mTimeInMillisFrom;
+    private final long mTimeInMillisTo;
+
+    public GetAllEventsUseCase(ThreadExecutor threadExecutor, PostExecutionThread postExecutionThread, long timeInMillisFrom, long timeInMillisTo) {
         super(threadExecutor, postExecutionThread);
+
+        this.mTimeInMillisFrom = timeInMillisFrom;
+        this.mTimeInMillisTo = timeInMillisTo;
     }
 
     @Override
     protected Observable buildUseCaseObservable() {
-        return new EventRepository().getAll();
+        return new EventRepository().getByDateRange(mTimeInMillisFrom, mTimeInMillisTo);
     }
 }

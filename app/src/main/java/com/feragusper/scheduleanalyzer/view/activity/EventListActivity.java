@@ -8,11 +8,13 @@ import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.Time;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -21,16 +23,28 @@ import com.feragusper.scheduleanalyzer.R;
 import com.feragusper.scheduleanalyzer.databinding.ActivityEventListBinding;
 import com.feragusper.scheduleanalyzer.domain.model.Event;
 import com.feragusper.scheduleanalyzer.view.adapter.EventListAdapter;
+import com.feragusper.scheduleanalyzer.view.dialog.EventFilterDialog;
+import com.feragusper.scheduleanalyzer.view.dialog.EventFilterListener;
 import com.feragusper.scheduleanalyzer.view.viewmodel.EventListViewModel;
 
+import java.util.Calendar;
 import java.util.List;
 
-public class EventListActivity extends AppCompatActivity implements EventListViewModel.DataListener {
+/**
+ * @author Fernando.Perez
+ * @since 0.1
+ */
+public class EventListActivity extends AppCompatActivity implements EventListViewModel.DataListener, EventFilterListener {
 
+    //region Properties
     private static final int MY_PERMISSIONS_REQUEST_READ_WRITE_CALENDAR = 123;
     private ActivityEventListBinding binding;
     private EventListViewModel eventListViewModel;
+    private long mTimeInMillisFrom;
+    private long mTimeInMillisTo;
+    //endregion
 
+    //region Activity Implementation
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,14 +53,21 @@ public class EventListActivity extends AppCompatActivity implements EventListVie
         binding.setViewModel(eventListViewModel);
         setSupportActionBar(binding.toolbar);
         setupRecyclerView(binding.reposRecyclerView);
-    }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+        if (mTimeInMillisFrom == 0) {
+            Calendar beginTime = Calendar.getInstance();
+            beginTime.set(2014, 9, 23, 8, 0);
+            mTimeInMillisFrom = beginTime.getTimeInMillis();
+        }
+
+        if (mTimeInMillisTo == 0) {
+            @SuppressWarnings("deprecation") Time time = new Time();
+            time.setToNow();
+            mTimeInMillisTo = time.toMillis(false);
+        }
 
         if (checkPermission()) {
-            eventListViewModel.loadEvents();
+            eventListViewModel.loadEvents(mTimeInMillisFrom, mTimeInMillisTo);
         }
     }
 
@@ -66,10 +87,9 @@ public class EventListActivity extends AppCompatActivity implements EventListVie
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_filter) {
-//            FragmentManager fm = getFragmentManager();
-//            EventFilterDialog editNameDialog = EventFilterDialog.newInstance(mExtraDateFrom, mExtraDateTo);
-//            editNameDialog.show(fm, "fragment_event_filter");
-//            editNameDialog.setTargetFragment(this, 1);
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            EventFilterDialog editNameDialog = EventFilterDialog.newInstance(mTimeInMillisFrom, mTimeInMillisTo);
+            editNameDialog.show(fragmentManager, "fragment_event_filter");
             return true;
         }
 
@@ -81,24 +101,53 @@ public class EventListActivity extends AppCompatActivity implements EventListVie
         super.onDestroy();
         eventListViewModel.destroy();
     }
+    //endregion
 
-    private void setupRecyclerView(RecyclerView recyclerView) {
-        EventListAdapter adapter = new EventListAdapter();
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-    }
-
+    //region EventListViewModel.DataListener Implementation
     @Override
     public void onEventsChanged(List<Event> events) {
         EventListAdapter adapter = (EventListAdapter) binding.reposRecyclerView.getAdapter();
         adapter.setEvents(events);
         adapter.notifyDataSetChanged();
     }
+    //endregion
+
+    //region OnRequestPermissionResultCallback Implementation
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_READ_WRITE_CALENDAR:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    eventListViewModel.loadEvents(mTimeInMillisFrom, mTimeInMillisTo);
+                } else {
+//code for deny
+                }
+                break;
+        }
+    }
+    //endregion
+
+    //region EventFilterListener Implementation
+    @Override
+    public void onApply(long timeInMillisFrom, long timeInMillisTo) {
+        mTimeInMillisFrom = timeInMillisFrom;
+        mTimeInMillisTo = timeInMillisTo;
+
+        eventListViewModel.loadEvents(mTimeInMillisFrom, mTimeInMillisTo);
+    }
+    //endregion
+
+    //region Private Implementation
+    private void setupRecyclerView(RecyclerView recyclerView) {
+        EventListAdapter adapter = new EventListAdapter();
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    public boolean checkPermission() {
+    private boolean checkPermission() {
         int currentAPIVersion = Build.VERSION.SDK_INT;
-        if (currentAPIVersion >= android.os.Build.VERSION_CODES.M) {
+        if (currentAPIVersion >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_CALENDAR)) {
                     AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
@@ -145,17 +194,6 @@ public class EventListActivity extends AppCompatActivity implements EventListVie
 
         return true;
     }
+    //endregion
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_READ_WRITE_CALENDAR:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    eventListViewModel.loadEvents();
-                } else {
-//code for deny
-                }
-                break;
-        }
-    }
 }

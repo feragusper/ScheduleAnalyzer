@@ -31,7 +31,7 @@ public class EventRepository {
             CalendarContract.Instances.DTEND
     };
 
-    public Observable<List<Event>> getAll() {
+    public Observable<List<Event>> getByDateRange(final long mTimeInMillisFrom, final long mTimeInMillisTo) {
         return Observable.create(new Observable.OnSubscribe<List<Event>>() {
 
             @Override
@@ -44,22 +44,8 @@ public class EventRepository {
 
                 // Specify the date range you want to search for recurring
                 // event instances
-                long mExtraDateFrom = 0;
-                if (mExtraDateFrom == 0) {
-                    Calendar beginTime = Calendar.getInstance();
-                    beginTime.set(2014, 9, 23, 8, 0);
-                    mExtraDateFrom = beginTime.getTimeInMillis();
-                }
-                ContentUris.appendId(builder, mExtraDateFrom);
-
-                long mExtraDateTo = 0;
-                if (mExtraDateTo == 0) {
-                    @SuppressWarnings("deprecation") Time time = new Time();
-                    time.setToNow();
-                    mExtraDateTo = time.toMillis(false);
-
-                }
-                ContentUris.appendId(builder, mExtraDateTo);
+                ContentUris.appendId(builder, mTimeInMillisFrom);
+                ContentUris.appendId(builder, mTimeInMillisTo);
 
                 // Submit the query
                 cursor = contentResolver.query(builder.build(), INSTANCE_PROJECTION, CalendarContract.Instances.SELF_ATTENDEE_STATUS + "=1", null, CalendarContract.Instances.DTSTART);

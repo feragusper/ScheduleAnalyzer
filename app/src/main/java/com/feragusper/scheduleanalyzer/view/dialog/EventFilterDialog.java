@@ -1,5 +1,6 @@
 package com.feragusper.scheduleanalyzer.view.dialog;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -35,6 +36,7 @@ public class EventFilterDialog extends DialogFragment {
     TextView vDateTo;
     private long mTimeInMillisFrom;
     private long mTimeInMillisTo;
+    private EventFilterListener eventFilterListener;
 
     public EventFilterDialog() {
         // Empty constructor required for DialogFragment
@@ -65,6 +67,13 @@ public class EventFilterDialog extends DialogFragment {
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.unbind(this);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        this.eventFilterListener = (EventFilterListener) activity;
     }
 
     @OnClick({R.id.et_date_from, R.id.et_date_to})
@@ -102,10 +111,7 @@ public class EventFilterDialog extends DialogFragment {
 
     @OnClick(R.id.btn_apply)
     public void applyFilter(View view) {
-        Intent intent = new Intent();
-        intent.putExtra(EXTRA_DATE_FROM, mTimeInMillisFrom);
-        intent.putExtra(EXTRA_DATE_TO, mTimeInMillisTo);
-        getTargetFragment().onActivityResult(getTargetRequestCode(), SET_FILTER, intent);
+        eventFilterListener.onApply(mTimeInMillisFrom, mTimeInMillisTo);
         dismiss();
     }
 

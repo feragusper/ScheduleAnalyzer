@@ -46,11 +46,11 @@ public class EventListViewModel implements ViewModel {
         getAllEventsUseCase.unsubscribe();
     }
 
-    public void loadEvents() {
+    public void loadEvents(long mTimeInMillisFrom, long mTimeInMillisTo) {
         progressVisibility.set(View.VISIBLE);
         recyclerViewVisibility.set(View.INVISIBLE);
 
-        getAllEventsUseCase = new GetAllEventsUseCase(new JobExecutor(), new UIThread());
+        getAllEventsUseCase = new GetAllEventsUseCase(new JobExecutor(), new UIThread(), mTimeInMillisFrom, mTimeInMillisTo);
         getAllEventsUseCase.execute(new GetAllEventsSubscriber());
     }
 
